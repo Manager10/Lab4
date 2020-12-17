@@ -75,6 +75,11 @@ public class GraphicsDisplay extends JPanel
         repaint();
     }
 
+    public void setShowDivisions(boolean showDivisions) {
+        this.showDivisions = showDivisions;
+        repaint();
+    }
+
     // Метод отображения всего компонента, содержащего график
     public void paintComponent(Graphics g)
     {
@@ -149,6 +154,7 @@ minY
         paintGraphics(canvas);
 // Затем (если нужно) отображаются маркеры точек, по которым строился график.
         if (showMarkers) paintMarkers(canvas);
+        if (showDivisions) paintDivisions(canvas);
 // Шаг 9 - Восстановить старые настройки холста
         canvas.setFont(oldFont);
         canvas.setPaint(oldPaint);
@@ -185,6 +191,65 @@ minY
         canvas.draw(graphics);
     }
 
+    protected void paintDivisions(Graphics2D canvas)
+    {
+        double stepX = (maxX - minX) / 100;
+        double stepY = (maxY - minY) / 100;
+        int count = 0;
+        canvas.setPaint(Color.BLACK);
+        for (double currentY = 0; currentY < maxY; currentY += stepY)
+        {
+            count++;
+            Point2D.Double center = xyToPoint(0, currentY);
+            if (count % 5 == 0)
+            {
+                canvas.draw(new Line2D.Double(shiftPoint(center, -10, 0), shiftPoint(center, 10, 0)));
+            }
+            else
+                canvas.draw(new Line2D.Double(shiftPoint(center, -6, 0), shiftPoint(center, 6, 0)));
+        }
+
+        count = 0;
+        for (double currentY = 0; currentY > minY; currentY -= stepY)
+        {
+            count++;
+            Point2D.Double center = xyToPoint(0, currentY);
+            if (count % 5 == 0)
+            {
+                canvas.draw(new Line2D.Double(shiftPoint(center, -10, 0), shiftPoint(center, 10, 0)));
+            }
+            else
+                canvas.draw(new Line2D.Double(shiftPoint(center, -6, 0), shiftPoint(center, 6, 0)));
+        }
+
+        count = 0;
+        for (double currentX = 0; currentX < maxX; currentX += stepX)
+        {
+            count++;
+            Point2D.Double center = xyToPoint(currentX, 0);
+            if (count % 5 == 0)
+            {
+                canvas.draw(new Line2D.Double(shiftPoint(center, 0, -10), shiftPoint(center, 0, 10)));
+            }
+            else
+                canvas.draw(new Line2D.Double(shiftPoint(center, 0, -6), shiftPoint(center, 0, 6)));
+        }
+
+        count = 0;
+        for (double currentX = 0; currentX > minX; currentX -= stepX)
+        {
+            count++;
+            Point2D.Double center = xyToPoint(currentX, 0);
+            if (count % 5 == 0)
+            {
+                canvas.draw(new Line2D.Double(shiftPoint(center, 0, -10), shiftPoint(center, 0, 10)));
+            }
+            else
+                canvas.draw(new Line2D.Double(shiftPoint(center, 0, -6), shiftPoint(center, 0, 6)));
+        }
+
+    }
+
     // Отображение маркеров точек, по которым рисовался график
     protected void paintMarkers(Graphics2D canvas)
     {
@@ -196,7 +261,24 @@ minY
 // Шаг 2 - Организовать цикл по всем точкам графика
         for (Double[] point : graphicsData)
         {
-           
+            Rectangle2D.Double marker = new Rectangle2D.Double();
+            Point2D.Double center = xyToPoint(point[0], point[1]);
+            Point2D.Double corner = shiftPoint(center, 5.5, 5.5);
+            marker.setFrameFromCenter(center, corner);
+            canvas.draw(new Line2D.Double(shiftPoint(center, -5.5, 5.5), shiftPoint(center, 5.5, -5.5)));
+            canvas.draw(new Line2D.Double(shiftPoint(center, 5.5, 5.5), shiftPoint(center, -5.5, -5.5)));
+            canvas.draw(marker);
+            Rectangle2D.Double marker1 = new Rectangle2D.Double();
+
+            int temp1 = (int)(point[1] + 0.0);
+            if (((point[1] + 0.1) > temp1) && ((point[1] - 0.1) < temp1))
+            {
+                corner = shiftPoint(center, 6.5, 6.5);
+                marker1.setFrameFromCenter(center, corner);
+                canvas.setPaint(Color.GREEN);
+                canvas.fill(marker1);
+            }
+            canvas.setPaint(Color.RED);
         }
     }
 
